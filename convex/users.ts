@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 
 export const CreateUser = mutation({
   args: {
@@ -8,37 +8,39 @@ export const CreateUser = mutation({
     picture: v.string(),
   },
   handler: async (ctx, args) => {
-    // check if user already exists in the database
+    // Check if user already exists
     const user = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("email"), args.email))
+      .query('users')
+      .filter((q) => q.eq(q.field('email'), args.email))
       .collect();
 
-    // if no user found, add a new user
-    if (user?.length == 0) {
+    // If user doesn't exist, insert new record
+    if (user.length === 0) {
       const data = {
         name: args.name,
         email: args.email,
         picture: args.picture,
         credits: 5000,
       };
-      const result = await ctx.db.insert("users", data);
+      await ctx.db.insert("users", data);
       return data;
     }
-    return user[0]; // user is a list of users, so we return the first one
+    
+    return user[0]; // Return existing user
   },
 });
 
-export const GetUser = mutation({
+export const GetUser = query({
   args: {
     email: v.string(),
   },
   handler: async (ctx, args) => {
-    // check if user already exists in the database
+    // Fetch user by email
     const user = await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("email"), args.email))
-      .collect();
-    return user[0]; // user is a list of users, so we return the first one
+      .first(); // Use `.first()` instead of `.collect()` to get a single object
+
+    return user; // Returns `null` if user is not found
   },
-}); // Get user by email to check if user exists in the database and fetches data from the database
+});

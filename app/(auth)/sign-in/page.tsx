@@ -34,7 +34,6 @@ function SignIn() {
         picture: user?.picture,
       });
 
-      console.log(result);
       setUser(result); 
       router.replace('/ai-assistants')// set user in context
     },
