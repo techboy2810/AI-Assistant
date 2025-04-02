@@ -71,18 +71,21 @@ function AIAssistants() {
   };
 
   const onClickContinue = async () => {
+    if (loading) return; // Prevent multiple clicks
+  
     if (!user?._id) {
       console.error("User ID is missing. Ensure the user is authenticated.");
       return;
     }
-
+  
     setLoading(true);
     try {
-      const result = await insertAssistant({
+      await insertAssistant({
         records: selectedAssistant,
-        uid: user._id, // Ensure `uid` is not undefined
+        uid: user._id,
       });
-      console.log(result);
+  
+      router.push("/workspace"); // Redirect after success ✅
     } catch (error) {
       console.error("Mutation failed:", error);
     }
